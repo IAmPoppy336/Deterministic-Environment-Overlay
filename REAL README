@@ -1,0 +1,96 @@
+# Deterministic Environment Overlays for Computer-Use Agents
+
+**Composable, text-only behavioral contracts for hardware + operating system simulation.**  
+Zero runtime cost. Fully traceable. Designed to be ingested by LLMs or used for mental execution during agent development and debugging.
+
+## The Problem
+
+Computer-use (GUI) agents that rely on screenshots, vision models, and simulated input are notoriously flaky. Common failure modes include:
+
+- Phantom clicks caused by DPI scaling mismatches
+- Sudden latency or OOMs when VRAM pressure forces layer offloading
+- Focus stealing, UAC interference, or Game Mode blocking input simulation
+- Non-deterministic behavior under thermal/power throttling or QoS changes
+
+Traditional testing requires spinning full VMs or running on the real desktop. This is slow, resource-heavy (especially with ComfyUI video generation or large local models), risky, and difficult to debug ("why did the click miss on step 7?").
+
+## The Solution
+
+Instead of (or alongside) heavy emulation, model only the **relevant subsystems** as precise, algebraic text specifications. These overlays act as a deterministic execution contract that an agent — or a developer — can reason over without ever executing code on real hardware.
+
+The approach stacks three layers:
+
+1. **Hardware VM** — VRAM budgets, thermal/power curves, memory hierarchy, CPU/GPU behavior under AI workloads (concrete high-end Windows desktop example included).
+2. **OS VM** — DPI coordinate math, input stack (SendInput), UI Automation, power/QoS policies, security surface, multi-monitor handling.
+3. **Deterministic Overlay Spec** — Composition rules, threshold triggers, latency/quantization fallbacks, reliability engine mapping, and the overall value proposition.
+
+When composed, these layers give you:
+- Exact traceability (`IF VRAM ≥ 14.2 GB + Balanced QoS → 2.8× latency + force quantize`)
+- Pre-flight simulation of long agent loops
+- LLM-native specs you can feed directly into prompts
+- Easy generation of deterministic failure-injection test cases
+
+## Why This Matters
+
+- **Zero runtime cost** — Simulate dozens of edge cases in seconds.
+- **Traceable failures** — Turn "the agent was unreliable" into "threshold X was crossed at step N, triggering Y fallback."
+- **Safer development** — Catch logic bugs before any real clicks or long-running GPU jobs.
+- **Composability** — Add new layers (agent loop rules, specific app behaviors) without rewriting everything.
+- **Especially valuable** when full VMs are impractical: resource-constrained machines, air-gapped environments, early logic iteration, or high-fidelity simulation of partial-offload inference scenarios.
+
+This is a practical engineering pattern that synthesizes ideas from deterministic simulation testing (DST), lightweight GUI agent environments, and formal behavioral contracts — tailored specifically for local LLM + computer-use agent development on consumer/high-end Windows hardware.
+
+## Repository Contents
+
+- `docs/example-hardware-vm.md` — Refined high-end Windows desktop example (Ryzen 9 9900X + RTX 5080). Updated with latest confirmed specs, realistic power/thermal ranges, and more quantitative simulation rules. Use as a template for your own machine.
+- `docs/windows-11-vm.md` — Windows 11 behavioral contract focused on GUI automation needs (DPI math, input stack, UI Automation, power/QoS, security). Expanded "Gotchas" section with additional agent-specific failure modes and mitigations.
+- `docs/deterministic-environment-overlay-spec.md` — The foundational specification: why the technique works, composition protocol, value proposition, integration patterns, and reliability mapping.
+
+All documents were audited and refined on 2026-06-29 for improved factual accuracy and simulation robustness.
+
+## How to Use
+
+1. Read the overlay spec to understand the contract model.
+2. Load the hardware + OS VMs relevant to your target machine.
+3. Mentally (or via LLM prompt) execute your agent loop against the combined rules.
+4. Identify thresholds that would trigger fallbacks, latency injection, or aborts.
+5. Refine your agent logic or reliability engine accordingly.
+6. Later validate the hot paths on real hardware.
+
+The specs are designed to be human-readable *and* LLM-ingestible. Paste relevant sections into your agent prompts or meta-reasoning system.
+
+## Extending the Model
+
+- Duplicate the hardware VM template for new machines.
+- Add domain-specific layers (e.g., browser behaviors, specific app UIA quirks, ComfyUI workflow constraints).
+- Feed the algebraic rules into automated test generators or reliability engines.
+
+## Legal & Licensing Notes
+
+The Windows 11 behavioral model is derived from publicly documented Microsoft APIs and observable system behavior (DPI awareness functions, UI Automation interfaces, SendInput, power management, etc.). It is a high-level specification for tooling and simulation purposes, not a clone or circumvention tool.
+
+This repository is provided under the **MIT License** (see `LICENSE`).
+
+**This is not legal advice.** While the risk is low for technical documentation of public platform behaviors, consult appropriate counsel if you have specific compliance concerns.
+
+## Status & Honest Assessment
+
+This is a working, publication-ready engineering artifact created in June 2026 as part of local agent tooling development on high-end Windows hardware.
+
+**June 29, 2026 refinement**: Hardware VM specs updated with latest AMD/NVIDIA data; power/thermal ranges and simulation rules made more quantitative. Windows 11 VM "Gotchas" section significantly expanded with additional practical failure modes and mitigations for agent developers. Full set audited for consistency and accuracy.
+
+The core synthesis (layered algebraic hardware + OS contracts optimized for LLM mental execution and traceable debugging of computer-use agents) appears to be a novel practical pattern, even though individual components (DST-style simulation, lightweight GUI state models, deterministic harnesses) exist in the broader literature and open-source ecosystem.
+
+It has already proven useful for catching coordinate math issues, VRAM pressure paths, and focus-related failure modes before touching the real desktop.
+
+## Contributing
+
+Issues, extensions, and new hardware/OS examples are welcome. Please keep contributions focused on precise, testable behavioral rules rather than vague advice.
+
+## Acknowledgments
+
+Built with rigorous attention to primary sources (Microsoft Learn documentation, observable Win11 behavior, AMD/NVIDIA specs) and a strong preference for local-first, zero-dependency solutions that put the developer in control.
+
+---
+
+**If this pattern helps you ship more reliable agents with less pain, star the repo and let others know.** Feedback on real-world usage is especially valuable.
